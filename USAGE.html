@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laravel Safeguard — Usage Guide</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2230; --border: #30363d;
+    --text: #e6edf3; --muted: #9aa7b4; --accent: #3fb950; --accent2: #58a6ff;
+    --danger: #f85149; --warn: #d29922; --code-bg: #0b0f16;
+    --radius: 12px; --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.65; font-size: 16px; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .layout { display: grid; grid-template-columns: 260px 1fr; max-width: 1200px; margin: 0 auto; }
+  /* Sidebar */
+  aside { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; padding: 28px 18px; border-right: 1px solid var(--border); }
+  aside .brand { font-weight: 700; font-size: 18px; margin-bottom: 4px; }
+  aside .brand small { display:block; color: var(--muted); font-weight: 400; font-size: 12px; }
+  aside nav a { display: block; color: var(--muted); padding: 5px 10px; border-radius: 8px; font-size: 14px; }
+  aside nav a:hover { color: var(--text); background: var(--panel2); text-decoration: none; }
+  aside nav .group { margin-top: 16px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #6b7785; padding: 0 10px; }
+  /* Main */
+  main { padding: 40px 48px 120px; min-width: 0; }
+  h1 { font-size: 34px; margin: 0 0 6px; }
+  h2 { font-size: 24px; margin: 48px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); scroll-margin-top: 20px; }
+  h3 { font-size: 18px; margin: 28px 0 8px; }
+  p, li { color: #cdd9e5; }
+  code { font-family: var(--mono); background: var(--panel2); padding: 1px 6px; border-radius: 6px; font-size: 13.5px; color: #ffd9a8; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; overflow-x: auto; margin: 14px 0; }
+  pre code { background: none; padding: 0; color: #d7e2ee; font-size: 13.5px; line-height: 1.55; }
+  .tag { display:inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .tag.ok { background: rgba(63,185,80,.15); color: var(--accent); border: 1px solid rgba(63,185,80,.4); }
+  .lead { font-size: 18px; color: var(--muted); }
+  .callout { border-radius: var(--radius); padding: 14px 18px; margin: 18px 0; border: 1px solid var(--border); background: var(--panel); }
+  .callout.warn { border-color: rgba(210,153,34,.5); background: rgba(210,153,34,.08); }
+  .callout.danger { border-color: rgba(248,81,73,.5); background: rgba(248,81,73,.08); }
+  .callout.tip { border-color: rgba(63,185,80,.5); background: rgba(63,185,80,.07); }
+  .callout strong { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; background: var(--panel); }
+  td code { white-space: nowrap; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .card h4 { margin: 0 0 6px; font-size: 15px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .kbd { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  footer { color: var(--muted); font-size: 13px; }
+  .pill-row { display:flex; gap:8px; flex-wrap:wrap; margin: 14px 0 8px; }
+  .pill { font-size:12px; border:1px solid var(--border); border-radius:999px; padding:3px 10px; color:var(--muted); background:var(--panel); }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    main { padding: 28px 20px 80px; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+  .comment { color: #6b7785; }
+  .str { color: #a5d6ff; }
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">🔒 Laravel Safeguard<small>Usage Guide · v1.0.0</small></div>
+    <nav>
+      <div class="group">Getting started</div>
+      <a href="#what">What it is</a>
+      <a href="#install">Installation</a>
+      <a href="#quickstart">Quick start</a>
+      <a href="#mimes">Laravel <code>mimes</code></a>
+      <div class="group">Usage</div>
+      <a href="#fluent">Fluent API</a>
+      <a href="#rules">Individual rules</a>
+      <a href="#recipes">Recipes</a>
+      <div class="group">Reference</div>
+      <a href="#config">Configuration</a>
+      <a href="#hardening">Hardening notes</a>
+      <a href="#notav">What it is NOT</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </aside>
+
+  <main>
+    <h1>Laravel Safeguard</h1>
+    <p class="lead">Fail-closed file-upload validation: blocks polyglot web shells, malicious PDFs/SVGs, zip bombs, Office macros, and spoofed MIME types — with structural parsing and content sanitization, not just regex.</p>
+    <div class="pill-row">
+      <span class="pill">PHP 8.1 – 8.5</span>
+      <span class="pill">Laravel 10 / 11 / 12 / 13</span>
+      <span class="pill">MIT</span>
+      <span class="pill">Fail-closed</span>
+    </div>
+
+    <h2 id="what">What it is</h2>
+    <p>Laravel Safeguard is a set of <strong>validation rules</strong> that inspect the real contents of an uploaded file before your app stores it. Its governing principle is to <strong>fail closed</strong>: when it cannot be sure a file is safe, it blocks the upload. Unknown content types, unparsable containers, and scanner errors all resolve to <em>reject</em> for security checks — never to "allow".</p>
+    <div class="grid2">
+      <div class="card"><h4>🐚 Always-on code scan</h4><p>Every upload is scanned for PHP/script openers regardless of type. A valid image/PDF/ZIP header never exempts a file, so polyglot web shells are caught.</p></div>
+      <div class="card"><h4>🔍 Structural MIME detection</h4><p>Classifies by byte structure, disambiguates OLE/ftyp/RIFF/ZIP families (real <code>.xls</code> → Excel, JAR/APK), and returns <em>untrusted</em> for unknown content.</p></div>
+      <div class="card"><h4>🧼 SVG sanitization</h4><p>SVGs run through an allowlist sanitizer; the <strong>cleaned</strong> SVG is what gets stored. Scripts, handlers, and DTD/XXE are removed.</p></div>
+      <div class="card"><h4>📄 PDF decode-before-scan</h4><p>Flate/LZW/ASCII85/ASCIIHex and object streams are inflated and <code>#xx</code> names decoded before matching <code>/JavaScript</code>, <code>/OpenAction</code>, …</p></div>
+      <div class="card"><h4>📦 Real zip-bomb detection</h4><p>Archives are streamed against a hard cap on <em>actual</em> decompressed bytes; forged sizes, traversal, ADS, symlinks, and nested archives are handled.</p></div>
+      <div class="card"><h4>📝 Office macros</h4><p>VBA/OLE/ActiveX in both OOXML and legacy OLE/CFB (<code>.doc/.xls/.ppt</code>), resolved via relationships and content types.</p></div>
+    </div>
+
+    <h2 id="install">Installation</h2>
+    <pre><code><span class="fn">composer</span> require abdian/laravel-upload-guard</code></pre>
+    <p>The service provider auto-registers via package discovery. Publish the config to tune behavior:</p>
+    <pre><code><span class="fn">php</span> artisan vendor:publish --tag=safeguard-config</code></pre>
+    <h3>Requirements</h3>
+    <ul>
+      <li>PHP <strong>8.1–8.5</strong>, Laravel <strong>10 / 11 / 12 / 13</strong></li>
+      <li>Required extensions: <code>fileinfo</code>, <code>zip</code>, <code>dom</code>, <code>libxml</code>, <code>exif</code></li>
+      <li>Optional: <code>gd</code> or <code>imagick</code> (only for the image <strong>re-encode</strong> mode)</li>
+    </ul>
+
+    <h2 id="quickstart">Quick start</h2>
+    <p>Add the single <code>safeguard</code> rule to any file field:</p>
+    <pre><code><span class="kw">public function</span> <span class="fn">upload</span>(<span class="kw">\Illuminate\Http\Request</span> $request)
+{
+    $request-><span class="fn">validate</span>([
+        <span class="str">'file'</span> => <span class="str">'required|safeguard'</span>,
+    ]);
+
+    <span class="comment">// The file is safe to store.</span>
+    $path = $request-><span class="fn">file</span>(<span class="str">'file'</span>)-><span class="fn">store</span>(<span class="str">'uploads'</span>);
+}</code></pre>
+    <p>By <strong>default</strong>, that one rule runs: structural MIME detection + dangerous-type blocking, strict extension/content matching, always-on code scanning, SVG sanitization, image scanning, PDF scanning, and <strong>archive + Office macro scanning</strong> — no extra calls needed.</p>
+
+    <h2 id="mimes">Pairing with Laravel's <code>mimes</code></h2>
+    <p>Combine with Laravel's native <code>mimes</code> rule and Safeguard will enforce that the file's <em>real</em> content type matches the allowed extensions (defeats extension spoofing):</p>
+    <pre><code>$request-><span class="fn">validate</span>([
+    <span class="str">'avatar'</span> => <span class="str">'required|safeguard|mimes:jpg,png,webp'</span>,
+    <span class="str">'doc'</span>    => <span class="str">'required|safeguard|mimes:pdf,docx'</span>,
+]);</code></pre>
+
+    <h2 id="fluent">Fluent API</h2>
+    <p>Use the rule object for fine-grained control:</p>
+    <pre><code><span class="kw">use</span> Abdian\UploadGuard\Rules\Safeguard;
+
+$request-><span class="fn">validate</span>([
+    <span class="comment">// Images: type filter + dimensions + privacy</span>
+    <span class="str">'avatar'</span> => [<span class="str">'required'</span>, (<span class="kw">new</span> <span class="fn">Safeguard</span>())
+        -><span class="fn">imagesOnly</span>()
+        -><span class="fn">maxDimensions</span>(<span class="str">1920</span>, <span class="str">1080</span>)
+        -><span class="fn">minDimensions</span>(<span class="str">64</span>, <span class="str">64</span>)
+        -><span class="fn">blockGps</span>()
+    ],
+
+    <span class="comment">// PDFs: page limit + block active content</span>
+    <span class="str">'report'</span> => [<span class="str">'required'</span>, (<span class="kw">new</span> <span class="fn">Safeguard</span>())
+        -><span class="fn">pdfsOnly</span>()
+        -><span class="fn">maxPages</span>(<span class="str">50</span>)
+        -><span class="fn">blockJavaScript</span>()
+        -><span class="fn">blockExternalLinks</span>()
+    ],
+
+    <span class="comment">// Documents (archive + macro scanning already on by default)</span>
+    <span class="str">'file'</span> => [<span class="str">'required'</span>, (<span class="kw">new</span> <span class="fn">Safeguard</span>())-><span class="fn">documentsOnly</span>()],
+]);</code></pre>
+
+    <h3>Available fluent methods</h3>
+    <table>
+      <tr><th>Group</th><th>Methods</th></tr>
+      <tr><td>Type filters</td><td><code>imagesOnly()</code> · <code>pdfsOnly()</code> · <code>documentsOnly()</code> · <code>archivesOnly()</code></td></tr>
+      <tr><td>MIME control</td><td><code>allowedMimes(array)</code> · <code>strictExtensionMatching(bool)</code></td></tr>
+      <tr><td>Image</td><td><code>maxDimensions(w,h)</code> · <code>minDimensions(w,h)</code> · <code>dimensions(minW,minH,maxW,maxH)</code> · <code>blockGps()</code> · <code>stripMetadata()</code></td></tr>
+      <tr><td>PDF</td><td><code>maxPages(n)</code> · <code>minPages(n)</code> · <code>pages(min,max)</code> · <code>blockJavaScript()</code> · <code>blockExternalLinks()</code></td></tr>
+      <tr><td>Archive / Office</td><td><code>scanArchives(bool)</code> · <code>blockMacros(bool)</code> · <code>allowMacros()</code></td></tr>
+    </table>
+
+    <h2 id="rules">Individual rules</h2>
+    <p>Each check is also available as a standalone string rule:</p>
+    <pre><code>$request-><span class="fn">validate</span>([
+    <span class="str">'avatar'</span>   => <span class="str">'required|safeguard_mime:image/jpeg,image/png|safeguard_image'</span>,
+    <span class="str">'icon'</span>     => <span class="str">'required|safeguard_svg'</span>,
+    <span class="str">'document'</span> => <span class="str">'required|safeguard_pdf|safeguard_pages:1,10'</span>,
+    <span class="str">'archive'</span>  => <span class="str">'required|safeguard_archive'</span>,
+    <span class="str">'report'</span>   => <span class="str">'required|safeguard_office'</span>,
+]);</code></pre>
+    <table>
+      <tr><th>Rule</th><th>What it does</th></tr>
+      <tr><td><code>safeguard</code></td><td>All-in-one, fail-closed pipeline (recommended)</td></tr>
+      <tr><td><code>safeguard_mime:t1,t2</code></td><td>Real content-type allowlist + dangerous-type block</td></tr>
+      <tr><td><code>safeguard_php</code></td><td>Always-on PHP/script code scan</td></tr>
+      <tr><td><code>safeguard_svg</code></td><td>Allowlist SVG sanitization (stores cleaned file)</td></tr>
+      <tr><td><code>safeguard_image</code></td><td>Image bomb / metadata / byte / trailing-data scan</td></tr>
+      <tr><td><code>safeguard_pdf</code></td><td>Decode-before-scan PDF analysis</td></tr>
+      <tr><td><code>safeguard_archive</code></td><td>Streaming archive inspection (bombs, traversal, …)</td></tr>
+      <tr><td><code>safeguard_office</code></td><td>OOXML + legacy OLE macro detection</td></tr>
+      <tr><td><code>safeguard_dimensions:maxW,maxH,minW,minH</code></td><td>Image dimensions</td></tr>
+      <tr><td><code>safeguard_pages:min,max</code></td><td>PDF page count</td></tr>
+    </table>
+
+    <h2 id="recipes">Common recipes</h2>
+    <h3>Avatar upload (image only, no GPS, re-encoded)</h3>
+    <pre><code><span class="comment">// config/safeguard.php → image_scanning.reencode = true  (strips any payload)</span>
+$request-><span class="fn">validate</span>([
+    <span class="str">'avatar'</span> => [<span class="str">'required'</span>, (<span class="kw">new</span> <span class="fn">Safeguard</span>())-><span class="fn">imagesOnly</span>()-><span class="fn">maxDimensions</span>(<span class="str">1024</span>,<span class="str">1024</span>)-><span class="fn">blockGps</span>()],
+]);</code></pre>
+    <h3>User-supplied ZIP (block dangerous contents)</h3>
+    <pre><code>$request-><span class="fn">validate</span>([<span class="str">'bundle'</span> => <span class="str">'required|safeguard'</span>]); <span class="comment">// archive scanning is on by default</span></code></pre>
+    <h3>Safely moving a validated upload (closes the TOCTOU window)</h3>
+    <pre><code><span class="comment">// The trait helper rejects traversal/symlink destinations before the move.</span>
+$dest = storage_path(<span class="str">'app/uploads/'</span> . $safeName);
+<span class="comment">// validateDestinationPath() lives on the ValidatesFileAccess trait used by scanners.</span></code></pre>
+
+    <h2 id="config">Configuration</h2>
+    <p>Highlights from <code>config/safeguard.php</code> (fully commented in the published file):</p>
+    <pre><code><span class="str">'max_scan_size'</span>   => <span class="str">25</span> * <span class="str">1024</span> * <span class="str">1024</span>,  <span class="comment">// larger files are rejected…</span>
+<span class="str">'over_cap_policy'</span> => <span class="str">'reject'</span>,            <span class="comment">// …or 'header_only'</span>
+
+<span class="str">'archive_scanning'</span> => [
+    <span class="str">'enabled'</span> => <span class="kw">true</span>,                            <span class="comment">// ON by default</span>
+    <span class="str">'max_decompressed_size'</span> => <span class="str">500</span> * <span class="str">1024</span> * <span class="str">1024</span>, <span class="comment">// hard cap on ACTUAL bytes</span>
+    <span class="str">'max_files_count'</span> => <span class="str">10000</span>,
+    <span class="str">'max_nesting_depth'</span> => <span class="str">3</span>,
+],
+
+<span class="str">'office_scanning'</span> => [<span class="str">'enabled'</span> => <span class="kw">true</span>, <span class="str">'block_macros'</span> => <span class="kw">true</span>, <span class="str">'block_activex'</span> => <span class="kw">true</span>],
+
+<span class="str">'svg_scanning'</span> => [<span class="str">'mode'</span> => <span class="str">'sanitize'</span>],   <span class="comment">// or 'reject'</span>
+
+<span class="str">'image_scanning'</span> => [
+    <span class="str">'max_pixels'</span> => <span class="str">64_000_000</span>,
+    <span class="str">'reencode'</span> => <span class="kw">false</span>,                         <span class="comment">// recommended; needs ext-gd/imagick</span>
+],
+
+<span class="str">'rate_limiting'</span> => [<span class="str">'enabled'</span> => <span class="kw">false</span>],     <span class="comment">// DoS guard (opt-in)</span>
+<span class="str">'quarantine'</span>    => [<span class="str">'enabled'</span> => <span class="kw">false</span>],     <span class="comment">// keep rejected files for forensics (opt-in)</span></code></pre>
+    <div class="callout warn"><strong>Migrating from a pre-1.0 dev install?</strong> Several keys were removed/renamed (e.g. <code>max_compression_ratio</code> → <code>max_decompressed_size</code>). See <code>UPGRADE.md</code> for the full migration table and behavior changes.</div>
+
+    <h2 id="hardening">Hardening notes</h2>
+    <div class="callout danger"><strong>TOCTOU:</strong> scanning the PHP temp file does not by itself close the temp→storage time-of-check/time-of-use window. Use <code>validateDestinationPath()</code> immediately before moving a validated upload, and prefer enabling <code>image_scanning.reencode</code>.</div>
+    <div class="callout tip"><strong>SVG storage:</strong> in <code>sanitize</code> mode the uploaded file is rewritten in place with the cleaned SVG, so <code>->store()</code> persists the safe version automatically.</div>
+    <div class="callout"><strong>Stricter than lax validators:</strong> Safeguard intentionally rejects polyglots, compressed/encrypted PDFs with active content, forged-size archives, legacy-macro Office docs, and DTD-bearing SVGs. Conversely it fixes common false positives (real <code>.xls/.ppt</code>, <code>.js/.csv/.py</code> text, compressed PDFs).</div>
+
+    <h2 id="notav">What it is NOT</h2>
+    <p>Safeguard is a <strong>synchronous validation library</strong>, not an antivirus. It does <strong>not</strong> perform AV signature scanning, sandboxed detonation, or ML classification. It defends the documented threat classes; pair it with OS-level controls (non-executable upload dirs, least privilege) for defense in depth.</p>
+
+    <h2 id="faq">FAQ</h2>
+    <h3>A legitimate file is being rejected — what do I do?</h3>
+    <p>Check the validation message. Common causes: the file's real type doesn't match its extension (rename it correctly), it exceeds <code>max_scan_size</code>, or it genuinely contains a script opener / macro. You can relax specific checks via config (e.g. <code>svg_scanning.mode</code>, <code>office_scanning.block_macros</code>) or fluent calls.</p>
+    <h3>Does it work in queues / CLI (no HTTP request)?</h3>
+    <p>Yes. Scanners guard <code>config()</code>/<code>request()</code>/<code>logger()</code> access and degrade safely without a bound request.</p>
+    <h3>How do I report a security issue?</h3>
+    <p>Privately — see <code>SECURITY.md</code> (email <strong>esanjdev@gmail.com</strong> or open a private GitHub Security Advisory).</p>
+
+    <hr>
+    <footer>
+      Laravel Safeguard v1.0.0 — MIT licensed. This guide reflects the shipped behavior; see
+      <code>README.md</code>, <code>CHANGELOG.md</code>, and <code>UPGRADE.md</code> for authoritative details.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

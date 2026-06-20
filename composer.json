@@ -1,0 +1,88 @@
+{
+    "name": "abdian/laravel-upload-guard",
+    "description": "Secure file upload validation for Laravel — fail-closed scanning for polyglot web shells, malicious PDFs/SVGs, zip bombs, Office macros, and spoofed MIME types.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "security",
+        "upload",
+        "file-upload",
+        "validation",
+        "malware",
+        "protection"
+    ],
+    "homepage": "https://github.com/abdian/laravel-upload-guard",
+    "authors": [
+        {
+            "name": "Abdian",
+            "homepage": "https://github.com/abdian"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/abdian/laravel-upload-guard/issues",
+        "source": "https://github.com/abdian/laravel-upload-guard",
+        "security": "https://github.com/abdian/laravel-upload-guard/security/policy"
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-fileinfo": "*",
+        "ext-zip": "*",
+        "ext-dom": "*",
+        "ext-libxml": "*",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/validation": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/http": "^10.0|^11.0|^12.0|^13.0",
+        "smalot/pdfparser": "^2.5",
+        "enshrined/svg-sanitize": "^0.21"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^10.0|^11.0|^12.0|^13.0",
+        "phpstan/phpstan": "^1.11"
+    },
+    "suggest": {
+        "ext-exif": "Enables EXIF metadata inspection/stripping in the image scanner; the scanner degrades gracefully without it.",
+        "ext-gd": "Required for the optional image re-encode mode that strips embedded payloads.",
+        "ext-imagick": "Alternative backend for the optional image re-encode mode."
+    },
+    "autoload": {
+        "psr-4": {
+            "Abdian\\UploadGuard\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Abdian\\UploadGuard\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Abdian\\UploadGuard\\SafeguardServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse",
+        "check": [
+            "@composer validate --strict",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "audit": {
+            "ignore": {
+                "PKSA-mdq4-51ck-6kdq": "Laravel framework advisory affects the dev test toolchain only; not a runtime dependency of this package.",
+                "PKSA-8qx3-n5y5-vvnd": "Laravel framework advisory affects the dev test toolchain only; not a runtime dependency of this package.",
+                "PKSA-w7xr-vk7n-rstm": "Laravel framework advisory affects the dev test toolchain only; not a runtime dependency of this package.",
+                "PKSA-4g5g-4rkv-myqs": "Local audit DB flags every published enshrined/svg-sanitize version; pinned to the latest available release."
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

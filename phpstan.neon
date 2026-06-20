@@ -1,0 +1,18 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Optional extensions are guarded at runtime with extension_loaded()/function_exists().
+        -
+            message: '#Function (exif_read_data|imagecreatefromstring|imagewebp|imagejpeg|imagepng|imagegif|imagebmp|imagedestroy|getimagesize)\b.*#'
+            path: src/ImageScanner.php
+        # ValidationRule::validate()'s $fail is a 2-arg PotentiallyTranslatedString closure;
+        # passing a simple 1-arg void closure is valid PHP (larastan models this; vanilla PHPStan does not).
+        - '#Parameter \#3 \$fail of method .*::validate\(\) expects Closure\(string, string\|null=\).*#'
+        # auth() returns the Auth\Factory contract; check()/id() are proxied to the default guard at runtime.
+        -
+            message: '#Call to an undefined method Illuminate\\Contracts\\Auth\\Factory::(check|id)\(\)#'
+            path: src/SecurityLogger.php

@@ -1,0 +1,71 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} · Laravel ${{ matrix.laravel }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Laravel 10 (Testbench 8) — PHP 8.1–8.3
+          - { php: '8.1', laravel: '10.*', testbench: '8.*' }
+          - { php: '8.2', laravel: '10.*', testbench: '8.*' }
+          - { php: '8.3', laravel: '10.*', testbench: '8.*' }
+          # Laravel 11 (Testbench 9) — PHP 8.2–8.4
+          - { php: '8.2', laravel: '11.*', testbench: '9.*' }
+          - { php: '8.3', laravel: '11.*', testbench: '9.*' }
+          - { php: '8.4', laravel: '11.*', testbench: '9.*' }
+          # Laravel 12 (Testbench 10) — PHP 8.2–8.5
+          - { php: '8.2', laravel: '12.*', testbench: '10.*' }
+          - { php: '8.3', laravel: '12.*', testbench: '10.*' }
+          - { php: '8.4', laravel: '12.*', testbench: '10.*' }
+          - { php: '8.5', laravel: '12.*', testbench: '10.*' }
+          # Laravel 13 (Testbench 11) — PHP 8.3–8.5 (Laravel 13 requires PHP >= 8.3)
+          - { php: '8.3', laravel: '13.*', testbench: '11.*' }
+          - { php: '8.4', laravel: '13.*', testbench: '11.*' }
+          - { php: '8.5', laravel: '13.*', testbench: '11.*' }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: fileinfo, zip, exif, gd, dom, libxml, mbstring
+          coverage: pcov
+          ini-values: memory_limit=1G
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Constrain framework versions
+        run: |
+          composer require --no-update --dev \
+            "laravel/framework:${{ matrix.laravel }}" \
+            "orchestra/testbench:${{ matrix.testbench }}"
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress -W
+
+      - name: Static analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --no-progress
+
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage/clover.xml
+
+      - name: Enforce coverage floor
+        if: matrix.php == '8.3' && matrix.laravel == '11.*'
+        run: php tests/coverage-floor.php coverage/clover.xml 50

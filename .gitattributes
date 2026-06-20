@@ -1,0 +1,23 @@
+# Keep the Composer dist lean: development-only paths are export-ignored.
+/.github            export-ignore
+/.idea              export-ignore
+/.phpunit.cache     export-ignore
+/coverage           export-ignore
+/docs               export-ignore
+/node_modules       export-ignore
+/openspec           export-ignore
+/tests              export-ignore
+
+/.editorconfig      export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/AGENTS.md          export-ignore
+/USAGE.html         export-ignore
+/package.json       export-ignore
+/package-lock.json  export-ignore
+/phpunit.xml        export-ignore
+/phpstan.neon       export-ignore
+/composer.lock      export-ignore
+
+*.md text eol=lf
+*.php text eol=lf

@@ -1,0 +1,21 @@
+/vendor/
+composer.lock
+.phpunit.result.cache
+.phpunit.cache/
+coverage/
+.DS_Store
+._*
+.AppleDouble
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# Documentation
+node_modules/
+docs/.vitepress/dist
+docs/.vitepress/cache
+
+# Local AI-assistant files (not part of the package)
+.claude/
+/CLAUDE.md
